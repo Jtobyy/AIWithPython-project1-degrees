@@ -84,15 +84,37 @@ def main():
             print(f"{i + 1}: {person1} and {person2} starred in {movie}")
 
 
-def shortest_path(source, target):
+def shortest_path(source: int, target: int):
     """
     Returns the shortest list of (movie_id, person_id) pairs
     that connect the source to the target.
 
     If no possible path, returns None.
     """
+    frontier = QueueFrontier()
+    sourceNeighbors = neighbors_for_person(source)
+    # sourceNode = Node(source, None, sourceNeighbours)
 
-    # TODO
+    # create nodes for all neighbours of the source
+    # their parent will be None
+    for neighbor in sourceNeighbors:
+        node = Node(neighbor, None, neighbors_for_person(neighbor.person_id))
+        frontier.add(node)
+
+    connector: tuple = ()
+    # keep checking if an item exists in the frontier
+    while frontier.frontier != []:
+        pivotNode: Node = frontier[0]
+        if pivotNode.state.person_id == target:
+            connector = pivotNode.state
+            break
+        else:
+            for neighbor in pivotNode.action:
+                node = Node(neighbor, pivotNode, neighbors_for_person(neighbor.person_id))
+                frontier.add(node)
+
+
+    
     raise NotImplementedError
 
 
@@ -122,7 +144,7 @@ def person_id_for_name(name):
         return person_ids[0]
 
 
-def neighbors_for_person(person_id):
+def neighbors_for_person(person_id: int):
     """
     Returns (movie_id, person_id) pairs for people
     who starred with a given person.
