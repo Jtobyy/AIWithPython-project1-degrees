@@ -84,7 +84,7 @@ def main():
             print(f"{i + 1}: {person1} and {person2} starred in {movie}")
 
 
-def shortest_path(source: int, target: int):
+def shortest_path(source, target):
     """
     Returns the shortest list of (movie_id, person_id) pairs
     that connect the source to the target.
@@ -93,30 +93,35 @@ def shortest_path(source: int, target: int):
     """
     frontier = QueueFrontier()
     sourceNeighbors = neighbors_for_person(source)
-    # sourceNode = Node(source, None, sourceNeighbours)
 
     # create nodes for all neighbours of the source
+    # their state will be (movie_id, person_id)
     # their parent will be None
+    # action will be their collaborations
     for neighbor in sourceNeighbors:
-        node = Node(neighbor, None, neighbors_for_person(neighbor.person_id))
+        node = Node(neighbor, None, neighbors_for_person(neighbor[1]))
         frontier.add(node)
 
-    connector: tuple = ()
-    # keep checking if an item exists in the frontier
+    connector: Node
+    # check for target_id is in the frontier
+    # If target_id doesn't exist in the frontier, 
+    # expand the node and add it's item to the frontier
     while frontier.frontier != []:
-        pivotNode: Node = frontier[0]
-        if pivotNode.state.person_id == target:
-            connector = pivotNode.state
+        pivotNode: Node = frontier.remove()
+        if pivotNode.state[1] == target:
+            connector = pivotNode
             break
         else:
             for neighbor in pivotNode.action:
-                node = Node(neighbor, pivotNode, neighbors_for_person(neighbor.person_id))
+                node = Node(neighbor, pivotNode, neighbors_for_person(neighbor[1]))
                 frontier.add(node)
 
-
+    shortest_list = [connector.state]
+    while connector.parent != None:
+        shortest_list.append(connector.parent.state)
+        connector = connector.parent
+    return shortest_list
     
-    raise NotImplementedError
-
 
 def person_id_for_name(name):
     """
